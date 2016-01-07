@@ -1,0 +1,37 @@
+# path stuff
+source:       .
+destination:  ./_site
+layouts_dir:  ./_layouts
+
+# pagination
+gems: [jekyll-paginate]
+paginate:     8
+
+
+# site config stuff
+title: huihoo's tech blog
+description: linux os 
+#url: hui-hoo.github.io
+favicon: /images/header.png
+
+# local server 
+detach:   false
+port:     16888
+host:     0.0.0.0
+baseurl:  ""
+
+# outputting
+permalink:      date
+paginate_path:  /page:num
+timezone:       null
+
+# personal info stuff
+email: hui_hoo@163.com
+github_username: hui_hoo
+
+author:
+  imageLink: /images/header.png
+
+# writing syntax stuff
+markdown: kramdown
+
