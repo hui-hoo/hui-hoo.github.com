@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>C语言的小知识点 - huihoo's tech blog</title>
+        <!-- meta -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <meta name="generator" content="Jekyll" />
+        <meta name="author" content="" />
+        <meta name="description" content="linux os" />
+        <meta name="keywords" content="" />
+        <!-- atom -->
+        <link rel="alternate" type="application/atom+xml" title="Recent Entries" href="" />
+        <link rel="shortcut icon" href="/images/header.png" type="image/x-icon" />
+        <!-- font-awesome -->
+        <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+        <link href='http://fonts.useso.com/css?family=Spirax' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="/css/syntax.css">
+        <link rel="stylesheet" href="/css/main.css">
+        
+        
+
+    </head>
+    <body>
+        <div class="head fn-clear">
+            <div class="header">
+                <h1 class="logo">
+                    <a href=""><i class="icon-anchor"></i></a>
+                </h1>
+                <nav class="nav">
+                    <ul>
+                        
+                    </ul>
+                </nav>
+                <div class="follow">
+                    
+                </div>
+            </div>
+        </div>
+        <div class="contain fn-clear">
+            <div class="container fn-clear">
+                <div class="main">
+                    <div class="article article-post">
+    <h2 class="title">C语言的小知识点</h2>
+    <div class="info">
+        <span class="info-title"><i class="icon-calendar"></i> Published: </span>
+        <span class="info-date">11 Jan 2016</span>
+        <span class="info-title"><i class="icon-folder-open"></i> Category: </span>
+        <span class="info-link"><a href="/categories.html#c-ref" >c</a></span>
+    </div>
+    <h3 id="sizeofstrlen">sizeof和strlen</h3>
+<p>sizeof: 在C语言中,sizeof是用于取得<strong>数据类型</strong>在内存中占用的字节数</p>
+
+<p>strlen: 在C语言中,strlen是用于取得<strong>NULL结尾的字符串</strong>占用的字节数</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>huihoo@lw:~/wspace/c$ cat hello.c 
+#include &lt;stdio.h&gt; /*123123123213*/
+#include &lt;stdlib.h&gt;
+#include &lt;string.h&gt;
+
+int main (void) { 
+  char string[5] = "12";
+  printf("%lu\n", sizeof(string));
+  printf("%lu\n", strlen(string));
+  return 0;
+} 
+
+huihoo@lw:~/wspace/c$ make
+5
+2
+huihoo@lw:~/wspace/c$
+</code></pre>
+</div>
+
+<h3 id="include">include预处理指令</h3>
+<p>C文件中,把一些公共的类型声明和函数原型声明抽出来形成header文件.
+要想在你的程序中使用这些类型或函数,就必须把这些头文件包含到你的源代码中,
+这也因此有了预处理命令include.
+include的作用就是在预处理过程中,把对应的文件的内容原原本本地包含进源代码中.
+格式一般是: include “header_file_name” 或 include <header_file_name></header_file_name></p>
+
+<p>由于header_file_name仅仅是文件名而已,不足以定位到文件系统中的某个文件.
+因此就有了默认的header search path.</p>
+
+<p><code class="highlighter-rouge">gcc -print-prog-name=cc1</code> -v 可以打印出默认的header search path</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>huihoo@lw:~/wspace/c$ `gcc -print-prog-name=cc1` -v
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/4.7/../../../../x86_64-linux-gnu/include"
+#include "..." search starts here:
+#include &lt;...&gt; search starts here:
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include
+ /usr/local/include
+ /usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed
+ /usr/include
+End of search list.
+</code></pre>
+</div>
+
+<p>从上面可以看出,
+如果是include “filename”,那么gcc会先从当前目录开始搜索,然后才是下面几个header search path
+如果是include <filename>,那么gcc直接从header search path开始搜索,不在当前目录下搜索</filename></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>huihoo@lw:~/wspace/c$ cat hello.c 
+#include "huihoo.h"
+
+int main (void) { 
+  return 0;
+  } 
+huihoo@lw:~/wspace/c$ make
+hello.c:1:20: fatal error: huihoo.h: No such file or directory
+compilation terminated.
+make: *** [all] Error 1
+huihoo@lw:~/wspace/c$ ls
+hello.c  makefile  run
+huihoo@lw:~/wspace/c$
+huihoo@lw:~/wspace/c$ touch huihoo.h
+huihoo@lw:~/wspace/c$ make
+huihoo@lw:~/wspace/c$
+</code></pre>
+</div>
+
+<p>从上面实验可以证明,
+include “filename”会在当前目录下搜索</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>huihoo@lw:~/wspace/c$ ls
+hello.c  huihoo.h  makefile  run
+huihoo@lw:~/wspace/c$ cat hello.c 
+#include &lt;huihoo.h&gt;
+
+int main (void) { 
+  return 0;
+} 
+huihoo@lw:~/wspace/c$ make
+hello.c:1:20: fatal error: huihoo.h: No such file or directory
+compilation terminated.
+make: *** [all] Error 1
+huihoo@lw:~/wspace/c$
+</code></pre>
+</div>
+
+<p>从上面实验可以证明,
+include <filename>不会在当前目录下搜索</filename></p>
+
+<p>接下来,找出上面几个header search path的搜索顺序
+首先,先在</p>
+
+<ul>
+  <li>/usr/lib/gcc/x86_64-linux-gnu/4.7/include</li>
+  <li>/usr/local/include</li>
+  <li>/usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed</li>
+  <li>/usr/include</li>
+</ul>
+
+<p>这几个目录下,创建huihoo.h,在各个huihoo.h中#define HUIHOO “huihoo.h的路径”</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>huihoo@lw:~/wspace/c$ cat /usr/lib/gcc/x86_64-linux-gnu/4.7/include/huihoo.h 
+#define HUIHOO "/usr/lib/gcc/x86_64-linux-gnu/4.7/include"
+huihoo@lw:~/wspace/c$ cat /usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed/huihoo.h 
+#define HUIHOO "/usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed"
+huihoo@lw:~/wspace/c$ cat /usr/local/include/huihoo.h 
+#define HUIHOO "/usr/local/include"
+huihoo@lw:~/wspace/c$ cat /usr/include/huihoo.h 
+#define HUIHOO "/usr/include"
+
+huihoo@lw:~/wspace/c$ cat hello.c 
+#include &lt;huihoo.h&gt;
+#include &lt;stdio.h&gt;
+
+int main (void) { 
+  printf("%s\n", HUIHOO);
+  return 0;
+} 
+huihoo@lw:~/wspace/c$ make
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include
+
+root@lw:/home/huihoo# rm /usr/lib/gcc/x86_64-linux-gnu/4.7/include/huihoo.h
+
+huihoo@lw:~/wspace/c$ make
+/usr/local/include
+
+root@lw:/home/huihoo# rm /usr/local/include/huihoo.h
+
+huihoo@lw:~/wspace/c$ make
+/usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed
+
+root@lw:/home/huihoo# rm /usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed/huihoo.h
+
+huihoo@lw:~/wspace/c$ make
+/usr/include
+
+root@lw:/home/huihoo# rm /usr/include/huihoo.h
+
+huihoo@lw:~/wspace/c$ make
+hello.c:1:20: fatal error: huihoo.h: No such file or directory
+compilation terminated.
+make: *** [all] Error 1
+huihoo@lw:~/wspace/c$
+</code></pre>
+</div>
+
+<h3 id="section">基本数据类型的最大和最小值</h3>
+<p>limit.h 头文件决定了各种基本数据类型的各种属性.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>root@lw:~# grep ' *# *define' /usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed/limits.h
+#define _GCC_LIMITS_H_
+#define _LIMITS_H___
+#define CHAR_BIT __CHAR_BIT__
+#define MB_LEN_MAX 1
+#define SCHAR_MIN (-SCHAR_MAX - 1)
+#define SCHAR_MAX __SCHAR_MAX__
+# define UCHAR_MAX (SCHAR_MAX * 2U + 1U)
+# define UCHAR_MAX (SCHAR_MAX * 2 + 1)
+#  define CHAR_MIN 0U
+#  define CHAR_MIN 0
+# define CHAR_MAX UCHAR_MAX
+# define CHAR_MIN SCHAR_MIN
+# define CHAR_MAX SCHAR_MAX
+#define SHRT_MIN (-SHRT_MAX - 1)
+#define SHRT_MAX __SHRT_MAX__
+# define USHRT_MAX (SHRT_MAX * 2U + 1U)
+# define USHRT_MAX (SHRT_MAX * 2 + 1)
+#define INT_MIN (-INT_MAX - 1)
+#define INT_MAX __INT_MAX__
+#define UINT_MAX (INT_MAX * 2U + 1U)
+#define LONG_MIN (-LONG_MAX - 1L)
+#define LONG_MAX __LONG_MAX__
+#define ULONG_MAX (LONG_MAX * 2UL + 1UL)
+# define LLONG_MIN (-LLONG_MAX - 1LL)
+# define LLONG_MAX __LONG_LONG_MAX__
+# define ULLONG_MAX (LLONG_MAX * 2ULL + 1ULL)
+# define LONG_LONG_MIN (-LONG_LONG_MAX - 1LL)
+# define LONG_LONG_MAX __LONG_LONG_MAX__
+# define ULONG_LONG_MAX (LONG_LONG_MAX * 2ULL + 1ULL)
+</code></pre>
+</div>
+
+    <div class="bdsharebuttonbox">
+        <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+        <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+        <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+        <a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a>
+        <a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a>
+        <a href="#" class="bds_mail" data-cmd="mail" title="分享到邮件分享"></a>
+        <a href="#" class="bds_more" data-cmd="more"></a>
+    </div>
+    <nav class="article-previous fn-clear">
+        
+        <a class="prev" href="/gcc%20preprocessor/2016/01/11/c-preprocessor.html" rel="bookmark">&laquo;&nbsp;GCC预处理</a>
+        
+        
+    </nav>
+    <div class="comment">
+        
+            
+        
+    </div>
+</div>
+
+                </div>
+                <div class="aside">
+                    <div class="aside-contact">
+                        <h4 class="title">About me</h4>
+                        <div class="det fn-clear">
+                            <div class="det-image">
+                                <img src="/images/header.png" />
+                            </div>
+                            <div class="det-text">
+                                <p></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="aside-item">
+                        <h4 class="title">Recent Posts</h4>
+                        <ul class="list">
+                            
+                                <li><a href="/c/2016/01/11/c-tips-and-tricks.html" title="C语言的小知识点" rel="bookmark">C语言的小知识点</a></li>
+                            
+                                <li><a href="/gcc%20preprocessor/2016/01/11/c-preprocessor.html" title="GCC预处理" rel="bookmark">GCC预处理</a></li>
+                            
+                                <li><a href="/c/2016/01/08/the-lost-art-of-c-structure-packing.html" title="C结构体之压缩艺术" rel="bookmark">C结构体之压缩艺术</a></li>
+                            
+                                <li><a href="/c/2016/01/08/c-design-stuff.html" title="C语言设计的相关问题" rel="bookmark">C语言设计的相关问题</a></li>
+                            
+                                <li><a href="/centos/2016/01/07/what-is-ops.html" title="运维之职难策" rel="bookmark">运维之职难策</a></li>
+                            
+                                <li><a href="/deploy/2016/01/07/centos-auto-deploy.html" title="运维之centos系统自动部署1-深入剖析centos" rel="bookmark">运维之centos系统自动部署1-深入剖析centos</a></li>
+                            
+                        </ul>
+                    </div>
+
+                    <div class="aside-item">
+                        <h4 class="title">Links</h4>
+                        <ul class="list">
+                            
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="foot">
+            <div class="footer">
+                <p>Copyright 2013. All rights reserved. Powered by <a href="http://jekyllrb.com" target="_blank">Jekyll</a></p>
+            </div>
+        </div>
+        <script type="text/javascript" src="http://ajax.useso.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        
+        
+    </body>
+</html>

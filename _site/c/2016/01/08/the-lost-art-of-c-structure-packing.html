@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>运维之centos系统自动部署1-深入剖析centos - huihoo's tech blog</title>
+        <title>C结构体之压缩艺术 - huihoo's tech blog</title>
         <!-- meta -->
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
         <meta name="generator" content="Jekyll" />
@@ -41,106 +41,32 @@
             <div class="container fn-clear">
                 <div class="main">
                     <div class="article article-post">
-    <h2 class="title">运维之centos系统自动部署1-深入剖析centos</h2>
+    <h2 class="title">C结构体之压缩艺术</h2>
     <div class="info">
         <span class="info-title"><i class="icon-calendar"></i> Published: </span>
-        <span class="info-date">07 Jan 2016</span>
+        <span class="info-date">08 Jan 2016</span>
         <span class="info-title"><i class="icon-folder-open"></i> Category: </span>
-        <span class="info-link"><a href="/categories.html#deploy-ref" >deploy</a></span>
+        <span class="info-link"><a href="/categories.html#c-ref" >c</a></span>
     </div>
-    <h2 id="centos">centos剖析思路</h2>
-<ol>
-  <li>
-    <p>逐步集成centos启动流程中涉及到的软件组件，最后定制出完整的可引导光盘镜像</p>
-  </li>
-  <li>
-    <p>在已正常运转的centos上,利用系统工具找出各个文件所属的软件包及其作用，整理出
-软件之间的依赖关系，最终也可利用工具形成可引导光盘镜像</p>
-  </li>
-</ol>
+    <h1 id="a-hrefhttpwwwcatborgesrstructure-packingca"><a href="http://www.catb.org/esr/structure-packing/">C结构体之压缩艺术(译)</a></h1>
 
-<h2 id="section">实验环境</h2>
-<ol>
-  <li>
-    <p>win8下的vmware workstation pro 12.0.0 build-2985596</p>
-  </li>
-  <li>
-    <p>CentOS-7-x86_64-Minimal-1511.iso</p>
-  </li>
-  <li>
-    <p>vmware里的centos 7(用2中的ISO安装的)</p>
-  </li>
-</ol>
+<h2 id="section">面向的读者</h2>
+<p>本文主要将的是如何减少C程序占用内存的技术,即手动重排C的结构体声明来达到减少内存占用的目的.
+读者的基本要求:至少需要基本的C编程语言</p>
 
-<h2 id="section-1">测试步骤</h2>
-<ol>
-  <li>先把2中的ISO挂载到centos 7下的/mnt目录下,我们可以看到整个镜像的目录结构</li>
-</ol>
+<p>如果你想要为内存有限的嵌入式系统</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>[root@localhost ~]# mount -o loop /dev/cdrom /mnt
-[root@localhost ~]# ls -la /mnt
-total 100
-dr-xr-xr-x.  8 root root  2048 Dec  9 18:03 .
-dr-xr-xr-x. 18 root root  4096 Dec 27 07:56 ..
--r--r--r--.  1 root root    14 Dec  9 17:35 CentOS_BuildTag
--r--r--r--.  1 root root    32 Dec  9 17:25 .discinfo
-dr-xr-xr-x.  3 root root  2048 Dec  9 17:33 EFI
--r--r--r--.  1 root root   215 Dec  9 17:35 EULA
--r--r--r--.  1 root root 18009 Dec  9 17:35 GPL
-dr-xr-xr-x.  3 root root  2048 Dec  9 17:33 images
-dr-xr-xr-x.  2 root root  2048 Dec  9 17:33 isolinux
-dr-xr-xr-x.  2 root root  2048 Dec  9 17:33 LiveOS
-dr-xr-xr-x.  2 root root 55296 Dec  9 18:03 Packages
-dr-xr-xr-x.  2 root root  4096 Dec  9 18:03 repodata
--r--r--r--.  1 root root  1690 Dec  9 17:35 RPM-GPG-KEY-CentOS-7
--r--r--r--.  1 root root  1690 Dec  9 17:35 RPM-GPG-KEY-CentOS-Testing-7
--r--r--r--.  1 root root  2883 Dec  9 18:03 TRANS.TBL
--r--r--r--.  1 root root  1109 Dec  9 17:35 .treeinfo
-</code></pre>
-</div>
+<h2 id="section-1">写该文章的原因</h2>
 
-<ol>
-  <li>目录结构解析</li>
-</ol>
+<h2 id="section-2">对齐要求</h2>
 
-<ul>
-  <li>CentOS_BuildTag文件: 该iso的build时间戳，精确到分钟</li>
-</ul>
+<h2 id="section-3">填充</h2>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>[root@localhost mnt]# cat CentOS_BuildTag 
-20151209-2215
-</code></pre>
-</div>
+<h2 id="section-4">结构体对齐和填充</h2>
 
-<ul>
-  <li>.discinfo文件:   该iso的创建unix时间戳,普通时间戳和面向的体系结构（这里是X86_64）</li>
-</ul>
+<h2 id="bitfields">位域(bitfields)</h2>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>[root@localhost mnt]# cat .discinfo 
-1449699925.561114
-151209
-x86_64
-</code></pre>
-</div>
-
-<ul>
-  <li>EFI目录:</li>
-</ul>
-
-<div class="highlighter-rouge"><pre class="highlight"><code>[root@localhost mnt]# tree EFI/
-EFI/
-├── BOOT
-│   ├── BOOTX64.EFI
-│   ├── fonts
-│   │   ├── TRANS.TBL
-│   │   └── unicode.pf2
-│   ├── grub.cfg
-│   ├── grubx64.efi
-│   ├── MokManager.efi
-│   └── TRANS.TBL
-└── TRANS.TBL
-</code></pre>
-</div>
+<h2 id="section-5">结构体重排艺术</h2>
 
 
     <div class="bdsharebuttonbox">
@@ -154,8 +80,10 @@ EFI/
     </div>
     <nav class="article-previous fn-clear">
         
+        <a class="prev" href="/c/2016/01/08/c-design-stuff.html" rel="bookmark">&laquo;&nbsp;C语言设计的相关问题</a>
         
-        <a class="next" href="/centos/2016/01/07/what-is-ops.html" rel="bookmark">运维之职难策&nbsp;&raquo;</a>
+        
+        <a class="next" href="/gcc%20preprocessor/2016/01/11/c-preprocessor.html" rel="bookmark">GCC预处理&nbsp;&raquo;</a>
         
     </nav>
     <div class="comment">
