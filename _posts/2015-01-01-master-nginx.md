@@ -183,9 +183,3 @@ Accept-Ranges: bytes
 ~~~
 如果请求头有Host, 那么ntinx会返回200,所以说,对于默认配置的ngxin,Host头部不可以省略.
 
-
-
-
-
-
-
