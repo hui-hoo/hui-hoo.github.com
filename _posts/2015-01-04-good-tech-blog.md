@@ -11,3 +11,4 @@ category: nginx
 - http://noops.me/
 - http://gen.lib.rus.ec/
 - http://bookzz.org/
+- http:md5.daimugua.com
